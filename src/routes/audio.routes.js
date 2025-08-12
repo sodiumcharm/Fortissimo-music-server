@@ -2,7 +2,7 @@ import { Router } from "express";
 import { uploadAudio } from "../middlewares/multer.middleware.js";
 import { verifyAccessToken, softTokenCheck } from "../middlewares/verifyToken.middleware.js";
 import { checkEmailVerification } from "../middlewares/checkEmailVerified.middleware.js";
-import { getAudios, handleAudioUpload, likeAudio } from "../controllers/audio.controllers.js";
+import { deleteAudio, getAudios, handleAudioUpload, likeAudio } from "../controllers/audio.controllers.js";
 
 const router = Router();
 
@@ -20,5 +20,7 @@ router.route("/upload-music").post(
 );
 
 router.route("/like/:id").patch(verifyAccessToken, likeAudio);
+
+router.route("/delete/:id").delete(verifyAccessToken, deleteAudio);
 
 export default router;

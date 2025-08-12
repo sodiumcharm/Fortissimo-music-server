@@ -130,33 +130,24 @@ export const handleAudioUpload = asyncHandler(async function (req, res, next) {
 
   if (!audio) {
     return next(
-      new ApiError(500, "Audio upload failed due to failure of internal error!")
+      new ApiError(500, "Audio upload failed due to internal error!")
     );
   }
 
-  await audio.populate("uploader", "fullname profileImage");
+  const [createdAudio, updatedUser] = await Promise.all([
+    Audio.findById(audio._id).populate("uploader", "fullname profileImage"),
+    User.findByIdAndUpdate(
+      verifiedUser._id,
+      { $push: { uploads: audio._id } },
+      { new: true }
+    ),
+  ]);
 
-  const user = await User.findById(verifiedUser._id);
-
-  if (!user) {
-    return next(new ApiError(404, "User does not exist! Upload failed."));
-  }
-
-  user.uploads.push(audio._id);
-
-  try {
-    await user.save();
-  } catch (error) {
+  if (!createdAudio || !updatedUser) {
     return next(new ApiError(500, "Error during updating user!"));
   }
 
-  const audioObj = audio.toObject();
-
-  delete audioObj.audioUploadId;
-  delete audioObj.lyricsUploadId;
-  delete audioObj.coverImageId;
-
-  res.status(200).json(new ApiResponse({ audio: audioObj }));
+  res.status(200).json(new ApiResponse({ audio: createdAudio }));
 });
 
 export const likeAudio = asyncHandler(async function (req, res, next) {
@@ -176,34 +167,31 @@ export const likeAudio = asyncHandler(async function (req, res, next) {
     return next(new ApiError(404, "Audio does not exist!"));
   }
 
-  const user = await User.findById(verifiedUser._id);
-
-  if (!user) {
-    return next(new ApiError(404, "User does not exist!"));
-  }
-
   let liked;
 
-  if (user.likedSongs.includes(audioId)) {
-    audio.likes -= 1;
-
-    user.likedSongs.splice(user.likedSongs.indexOf(audioId), 1);
-
-    liked = false;
-  } else if (!user.likedSongs.includes(audioId)) {
-    audio.likes += 1;
-
-    user.likedSongs.push(audioId);
-
-    liked = true;
-  }
-
   try {
-    await audio.save({ validateBeforeSave: false });
-    await user.save({ validateBeforeSave: false });
+    if (verifiedUser.likedSongs.includes(audioId)) {
+      await Promise.all([
+        Audio.findByIdAndUpdate(audio._id, { $inc: { likes: -1 } }),
+        User.findByIdAndUpdate(verifiedUser._id, {
+          $pull: { likedSongs: audioId },
+        }),
+      ]);
+
+      liked = false;
+    } else if (!verifiedUser.likedSongs.includes(audioId)) {
+      await Promise.all([
+        Audio.findByIdAndUpdate(audio._id, { $inc: { likes: 1 } }),
+        User.findByIdAndUpdate(verifiedUser._id, {
+          $addToSet: { likedSongs: audioId },
+        }),
+      ]);
+
+      liked = true;
+    }
   } catch (error) {
     return next(
-      new ApiError(500, "Unable to like due to internal server error!")
+      new ApiError(500, "Unable to register like due to internal server error!")
     );
   }
 
@@ -212,7 +200,7 @@ export const likeAudio = asyncHandler(async function (req, res, next) {
     .json(
       new ApiResponse(
         { liked },
-        `Audio ID ${audio._id} is ${liked ? "liked" : "de-liked"}.`
+        `Audio ID ${audio._id} is ${liked ? "liked" : "unliked"}.`
       )
     );
 });
@@ -228,7 +216,9 @@ export const deleteAudio = asyncHandler(async function (req, res, next) {
 
   const audioId = req.params?.id;
 
-  const audio = await Audio.findById(audioId);
+  const audio = await Audio.findById(audioId).select(
+    "+audioUploadId +lyricsUploadId +coverImageId"
+  );
 
   if (!audio) {
     return next(
@@ -239,7 +229,7 @@ export const deleteAudio = asyncHandler(async function (req, res, next) {
     );
   }
 
-  if (audio.uploader !== verifiedUser._id) {
+  if (audio.uploader.toString() !== verifiedUser._id.toString()) {
     return next(
       new ApiError(
         403,
@@ -248,7 +238,10 @@ export const deleteAudio = asyncHandler(async function (req, res, next) {
     );
   }
 
-  const audioDeleteResult = await deleteFromCloudinary(audio.audioUploadId);
+  const audioDeleteResult = await deleteFromCloudinary(
+    audio.audioUploadId,
+    "video"
+  );
 
   if (!audioDeleteResult) {
     return next(
@@ -257,7 +250,10 @@ export const deleteAudio = asyncHandler(async function (req, res, next) {
   }
 
   if (audio.lyricsUploadId) {
-    const lyricsDeleteResult = await deleteFromCloudinary(audio.lyricsUploadId);
+    const lyricsDeleteResult = await deleteFromCloudinary(
+      audio.lyricsUploadId,
+      "raw"
+    );
 
     if (!lyricsDeleteResult) {
       return next(
@@ -269,8 +265,11 @@ export const deleteAudio = asyncHandler(async function (req, res, next) {
     }
   }
 
-  if (audio.profileImageId) {
-    const imageDeleteResult = await deleteFromCloudinary(audio.profileImageId);
+  if (audio.coverImageId) {
+    const imageDeleteResult = await deleteFromCloudinary(
+      audio.coverImageId,
+      "image"
+    );
 
     if (!imageDeleteResult) {
       return next(
@@ -290,22 +289,17 @@ export const deleteAudio = asyncHandler(async function (req, res, next) {
     );
   }
 
-  const user = await User.findById(verifiedUser._id);
-
-  if (!user) {
-    return next(
-      new ApiError(500, "Audio was deleted but failed to update the user!")
-    );
-  }
-
-  user.uploads.splice(user.uploads.indexOf(audioId), 1);
-
-  if (user.likedSongs.includes(audioId)) {
-    user.likedSongs.splice(user.likedSongs.indexOf(audioId), 1);
-  }
-
   try {
-    await user.save({ validateBeforeSave: false });
+    await Promise.all([
+      User.updateOne(
+        { _id: verifiedUser._id },
+        { $pull: { uploads: audioId } }
+      ),
+      User.updateMany(
+        { likedSongs: audioId },
+        { $pull: { likedSongs: audioId } }
+      ),
+    ]);
   } catch (error) {
     return next(
       new ApiError(500, "Audio was deleted but failed to update the user!")

@@ -292,7 +292,16 @@ export const refreshAccess = asyncHandler(async function (req, res, next) {
     const user = await User.findById(decoded._id);
 
     if (!user) {
-      return next(new ApiError(404, "User not found!"));
+      return next(new ApiError(404, "User does no longer exist!"));
+    }
+
+    if (user.isPasswordChangedAfter(decoded.iat)) {
+      return next(
+        new ApiError(
+          401,
+          "User changed password after issuing this token! Please login again."
+        )
+      );
     }
 
     const isMatching = await bcrypt.compare(
@@ -374,7 +383,6 @@ export const passwordReset = asyncHandler(async function (req, res, next) {
     return next(new ApiError(400, "Email address is required!"));
   }
 
-  newPassword = newPassword.trim();
   email = email.trim();
 
   if (!isValidPassword(newPassword)) {
@@ -396,7 +404,7 @@ export const passwordReset = asyncHandler(async function (req, res, next) {
   user.passwordChangedAt = Date.now();
 
   try {
-    await user.save();
+    await user.save({ validateBeforeSave: false });
   } catch (error) {
     return next(new ApiError(500, "Failed to save new password!"));
   }
@@ -467,7 +475,7 @@ export const changePassword = asyncHandler(async function (req, res, next) {
   user.passwordChangedAt = Date.now();
 
   try {
-    await user.save();
+    await user.save({ validateBeforeSave: false });
   } catch (error) {
     return next(new ApiError(500, "Password change failed!"));
   }
@@ -520,7 +528,7 @@ export const changeName = asyncHandler(async function (req, res, next) {
   user.fullname = newFullname;
 
   try {
-    await user.save();
+    await user.save({ validateBeforeSave: false });
   } catch (error) {
     return next(new ApiError(500, "Name change failed!"));
   }
@@ -554,7 +562,10 @@ export const changeProfilePhoto = asyncHandler(async function (req, res, next) {
   }
 
   if (user.profileImageId) {
-    const deleteResult = await deleteFromCloudinary(user.profileImageId);
+    const deleteResult = await deleteFromCloudinary(
+      user.profileImageId,
+      "image"
+    );
 
     if (!deleteResult) {
       return next(
@@ -583,7 +594,7 @@ export const changeProfilePhoto = asyncHandler(async function (req, res, next) {
   user.profileImageId = uploadResult.public_id;
 
   try {
-    await user.save();
+    await user.save({ validateBeforeSave: false });
   } catch (error) {
     return next(
       new ApiError(
@@ -620,7 +631,10 @@ export const removeProfilePhoto = asyncHandler(async function (req, res, next) {
   }
 
   if (user.profileImageId) {
-    const deleteResult = await deleteFromCloudinary(user.profileImageId);
+    const deleteResult = await deleteFromCloudinary(
+      user.profileImageId,
+      "image"
+    );
 
     if (!deleteResult) {
       return next(
@@ -636,7 +650,7 @@ export const removeProfilePhoto = asyncHandler(async function (req, res, next) {
   user.profileImageId = "";
 
   try {
-    await user.save();
+    await user.save({ validateBeforeSave: false });
   } catch (error) {
     return next(
       new ApiError(
