@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { ApiError } from "./utils/apiError.js";
-import { globalErrorHandler } from "./controllers/error.controller.js";
+import { globalErrorHandler } from "./controllers/error.controllers.js";
 
 const app = express();
 
@@ -23,8 +23,11 @@ app.use(cookieParser());
 
 // ROUTE HANDLING
 import userRouter from "./routes/user.routes.js";
+import audioRouter from "./routes/audio.routes.js";
 
 app.use("/api/v1/users", userRouter);
+
+app.use("/api/v1/audios", audioRouter);
 
 // ERROR HANDLING
 app.use(globalErrorHandler);

@@ -1,0 +1,24 @@
+import { Router } from "express";
+import { uploadAudio } from "../middlewares/multer.middleware.js";
+import { verifyAccessToken, softTokenCheck } from "../middlewares/verifyToken.middleware.js";
+import { checkEmailVerification } from "../middlewares/checkEmailVerified.middleware.js";
+import { getAudios, handleAudioUpload, likeAudio } from "../controllers/audio.controllers.js";
+
+const router = Router();
+
+router.route("/all-audios").get(softTokenCheck, getAudios);
+
+router.route("/upload-music").post(
+  verifyAccessToken,
+  checkEmailVerification,
+  uploadAudio.fields([
+    { name: "audio", maxCount: 1 },
+    { name: "lyrics", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 },
+  ]),
+  handleAudioUpload
+);
+
+router.route("/like/:id").patch(verifyAccessToken, likeAudio);
+
+export default router;

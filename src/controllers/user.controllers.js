@@ -19,7 +19,7 @@ const accessTokenOptions = {
   httpOnly: true,
   secure: true,
   sameSite: "none",
-  maxAge: 1000 * 60 * 30,
+  maxAge: 1000 * 60 * 60 * 24 * 15,
 };
 
 const refreshTokenOptions = {
@@ -43,6 +43,24 @@ export const getUserDetails = asyncHandler(async function (req, res, next) {
   }
 
   res.status(200).json(new ApiResponse({ user: verifiedUser }));
+});
+
+// *************************************************************
+// GET OTHER USER DETAIL AT APP LOAD CONTROLLER
+// *************************************************************
+
+export const getOtherUser = asyncHandler(async function (req, res, next) {
+  const userId = req.params?.id;
+
+  const user = await User.findById(userId).select(
+    "fullname username profileImage uploads createdPlaylists"
+  );
+
+  if (!user) {
+    return next(new ApiError(404, "Invalid user ID or user does not exist!"));
+  }
+
+  res.status(200).json(new ApiResponse({ user }));
 });
 
 // *************************************************************
@@ -375,6 +393,7 @@ export const passwordReset = asyncHandler(async function (req, res, next) {
   }
 
   user.password = newPassword;
+  user.passwordChangedAt = Date.now();
 
   try {
     await user.save();
@@ -445,6 +464,7 @@ export const changePassword = asyncHandler(async function (req, res, next) {
   }
 
   user.password = newPassword;
+  user.passwordChangedAt = Date.now();
 
   try {
     await user.save();

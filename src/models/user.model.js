@@ -35,6 +35,9 @@ const userSchema = new mongoose.Schema(
       required: [true, "Password is required!"],
       minlength: 8,
     },
+    passwordChangedAt: {
+      type: Date,
+    },
     profileImage: {
       type: String,
     },
@@ -140,6 +143,16 @@ userSchema.methods.generateRefreshToken = function () {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
     }
   );
+};
+
+userSchema.methods.isPasswordChangedAfter = function (JWTIssueTime) {
+  if (this.passwordChangedAt) {
+    const passwordChangingTime = this.passwordChangedAt.getTime() / 1000;
+
+    return JWTIssueTime < passwordChangingTime;
+  }
+
+  return false;
 };
 
 export const User = mongoose.model("User", userSchema);

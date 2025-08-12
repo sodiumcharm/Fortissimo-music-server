@@ -2,6 +2,7 @@ import { Router } from "express";
 import { uploadProfileImage } from "../middlewares/multer.middleware.js";
 import {
   getUserDetails,
+  getOtherUser,
   loginUser,
   registerUser,
   refreshAccess,
@@ -17,13 +18,15 @@ import {
   verifyEmail,
   generatePasswordOtp,
   verifyPasswordOtp,
-} from "../controllers/otpVerification.controller.js";
+} from "../controllers/otpVerification.controllers.js";
 import { verifyAccessToken } from "../middlewares/verifyToken.middleware.js";
 import { checkEmailVerification } from "../middlewares/checkEmailVerified.middleware.js";
 
 const router = Router();
 
 router.route("/me").get(verifyAccessToken, getUserDetails);
+
+router.route("/:id").get(getOtherUser);
 
 router
   .route("/signup")

@@ -6,6 +6,10 @@ const audioSchema = new mongoose.Schema(
       type: String,
       required: [true, "Audio link is required!"],
     },
+    audioUploadId: {
+      type: String,
+      select: false,
+    },
     title: {
       type: String,
       required: [true, "Audio title is required!"],
@@ -19,6 +23,10 @@ const audioSchema = new mongoose.Schema(
     lyrics: {
       type: String,
       default: null,
+    },
+    lyricsUploadId: {
+      type: String,
+      select: false,
     },
     uploader: {
       type: mongoose.Schema.Types.ObjectId,
@@ -35,6 +43,14 @@ const audioSchema = new mongoose.Schema(
     },
     coverImage: {
       type: String,
+    },
+    coverImageId: {
+      type: String,
+      select: false,
+    },
+    public: {
+      type: String,
+      required: true,
     },
   },
   { timestamps: true }
