@@ -1,8 +1,20 @@
 import { Router } from "express";
 import { uploadAudio } from "../middlewares/multer.middleware.js";
-import { verifyAccessToken, softTokenCheck } from "../middlewares/verifyToken.middleware.js";
+import {
+  verifyAccessToken,
+  softTokenCheck,
+} from "../middlewares/verifyToken.middleware.js";
 import { checkEmailVerification } from "../middlewares/checkEmailVerified.middleware.js";
-import { deleteAudio, getAudios, handleAudioUpload, likeAudio } from "../controllers/audio.controllers.js";
+import {
+  deleteAudio,
+  editAudio,
+  getAudios,
+  handleAudioUpload,
+  likeAudio,
+  recordHistory,
+  removeCoverImage,
+  removeLyrics,
+} from "../controllers/audio.controllers.js";
 
 const router = Router();
 
@@ -22,5 +34,20 @@ router.route("/upload-music").post(
 router.route("/like/:id").patch(verifyAccessToken, likeAudio);
 
 router.route("/delete/:id").delete(verifyAccessToken, deleteAudio);
+
+router.route("/remove-lyrics/:id").delete(verifyAccessToken, removeLyrics);
+
+router.route("/remove-cover/:id").delete(verifyAccessToken, removeCoverImage);
+
+router.route("/edit").patch(
+  verifyAccessToken,
+  uploadAudio.fields([
+    { name: "lyrics", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 },
+  ]),
+  editAudio
+);
+
+router.route("/record-history").post(softTokenCheck, recordHistory);
 
 export default router;

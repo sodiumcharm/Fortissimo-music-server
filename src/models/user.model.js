@@ -55,6 +55,12 @@ const userSchema = new mongoose.Schema(
           ref: "Audio",
           required: true,
         },
+        context: {
+          type: String,
+          required: true,
+          lowercase: true,
+          trim: true,
+        },
         playedFromPlaylist: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Playlist",

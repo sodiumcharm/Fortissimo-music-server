@@ -504,8 +504,6 @@ export const changeName = asyncHandler(async function (req, res, next) {
     return next(new ApiError(400, "Invalid input type provided!"));
   }
 
-  newFullname = newFullname.trim();
-
   if (newFullname.trim() === "") {
     return next(new ApiError(400, "New full name is required!"));
   }
@@ -630,13 +628,19 @@ export const removeProfilePhoto = asyncHandler(async function (req, res, next) {
     );
   }
 
+  if (!user.profileImage) {
+    return next(
+      new ApiError(400, "User does not has profile image to remove!")
+    );
+  }
+
   if (user.profileImageId) {
     const deleteResult = await deleteFromCloudinary(
       user.profileImageId,
       "image"
     );
 
-    if (!deleteResult) {
+    if (!deleteResult || deleteResult.result !== "ok") {
       return next(
         new ApiError(
           500,
