@@ -56,6 +56,14 @@ const uploadProfileImage = multer({
   fileFilter: imageFilter,
 });
 
+const uploadCoverImage = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+  fileFilter: imageFilter,
+});
+
 const uploadAudio = multer({
   storage,
   limits: {
@@ -65,4 +73,4 @@ const uploadAudio = multer({
   fileFilter: audioFilter,
 });
 
-export { uploadProfileImage, uploadAudio };
+export { uploadProfileImage, uploadCoverImage, uploadAudio };

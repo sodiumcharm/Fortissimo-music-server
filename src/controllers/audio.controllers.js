@@ -8,6 +8,11 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
+import mongoose from "mongoose";
+
+// *************************************************************
+// GET ALL AUDIOS CONTROLLER
+// *************************************************************
 
 export const getAudios = asyncHandler(async function (req, res, next) {
   const verifiedUser = req.user;
@@ -33,6 +38,10 @@ export const getAudios = asyncHandler(async function (req, res, next) {
 
   res.status(200).json(new ApiResponse({ audios }));
 });
+
+// *************************************************************
+// CREATE NEW AUDIO CONTROLLER
+// *************************************************************
 
 export const handleAudioUpload = asyncHandler(async function (req, res, next) {
   const verifiedUser = req.user;
@@ -151,6 +160,10 @@ export const handleAudioUpload = asyncHandler(async function (req, res, next) {
   res.status(200).json(new ApiResponse({ audio: createdAudio }));
 });
 
+// *************************************************************
+// LIKE CONTROLLER
+// *************************************************************
+
 export const likeAudio = asyncHandler(async function (req, res, next) {
   const verifiedUser = req.user;
 
@@ -205,6 +218,10 @@ export const likeAudio = asyncHandler(async function (req, res, next) {
       )
     );
 });
+
+// *************************************************************
+// DELETE AUDIO CONTROLLER
+// *************************************************************
 
 export const deleteAudio = asyncHandler(async function (req, res, next) {
   const verifiedUser = req.user;
@@ -300,7 +317,11 @@ export const deleteAudio = asyncHandler(async function (req, res, next) {
         { likedSongs: audioId },
         { $pull: { likedSongs: audioId } }
       ),
-      Playlist.updateMany({ songs: audioId }, { $pull: { songs: audioId } }),
+      User.updateMany({}, { $pull: { watchHistory: { audio: audioId } } }),
+      Playlist.updateMany(
+        { songs: audioId },
+        { $pull: { songs: audioId }, $inc: { totalDuration: -audio.duration } }
+      ),
     ]);
   } catch (error) {
     return next(
@@ -314,6 +335,10 @@ export const deleteAudio = asyncHandler(async function (req, res, next) {
       new ApiResponse(null, `Audio ID ${audioId} is successfully deleted.`)
     );
 });
+
+// *************************************************************
+// AUDIO EDIT CONTROLLER
+// *************************************************************
 
 export const editAudio = asyncHandler(async function (req, res, next) {
   const verifiedUser = req.user;
@@ -429,6 +454,10 @@ export const editAudio = asyncHandler(async function (req, res, next) {
   res.status(200).json(new ApiResponse({ audio: updatedAudio }));
 });
 
+// *************************************************************
+// REMOVE LYRICS CONTROLLER
+// *************************************************************
+
 export const removeLyrics = asyncHandler(async function (req, res, next) {
   const verifiedUser = req.user;
 
@@ -474,6 +503,10 @@ export const removeLyrics = asyncHandler(async function (req, res, next) {
     .status(200)
     .json(new ApiResponse(null, "The audio lyrics is successfully removed."));
 });
+
+// *************************************************************
+// REMOVE COVER IMAGE CONTROLLER
+// *************************************************************
 
 export const removeCoverImage = asyncHandler(async function (req, res, next) {
   const verifiedUser = req.user;
@@ -523,6 +556,10 @@ export const removeCoverImage = asyncHandler(async function (req, res, next) {
     );
 });
 
+// *************************************************************
+// HISTORY RECORDING CONTROLLER
+// *************************************************************
+
 export const recordHistory = asyncHandler(async function (req, res, next) {
   const verifiedUser = req.user;
 
@@ -561,7 +598,7 @@ export const recordHistory = asyncHandler(async function (req, res, next) {
     playedAt: Date.now(),
   };
 
-  const updatedUser = await findByIdAndUpdate(
+  const updatedUser = await User.findByIdAndUpdate(
     user._id,
     {
       $push: {

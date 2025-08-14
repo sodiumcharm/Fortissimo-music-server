@@ -42,7 +42,18 @@ export const getUserDetails = asyncHandler(async function (req, res, next) {
     );
   }
 
-  res.status(200).json(new ApiResponse({ user: verifiedUser }));
+  const user = await User.findById(verifiedUser._id)
+    .populate({
+      path: "watchHistory.audio",
+      select: "audio title coverImage artist",
+    })
+    .select("-password -refreshToken -__v");
+
+  if (!user) {
+    return next(new ApiError(401, "User does not exist!"));
+  }
+
+  res.status(200).json(new ApiResponse({ user }));
 });
 
 // *************************************************************

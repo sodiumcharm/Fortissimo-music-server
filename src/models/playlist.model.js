@@ -10,17 +10,20 @@ const playlistSchema = new mongoose.Schema(
     coverImage: {
       type: String,
     },
+    coverImageId: {
+      type: String,
+      select: false,
+    },
     description: {
       type: String,
       trim: true,
+      maxlength: 200,
     },
-    genre: [
-      {
-        type: String,
-        lowercase: true,
-        trim: true,
-      },
-    ],
+    genre: {
+      type: String,
+      lowercase: true,
+      trim: true,
+    },
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -40,9 +43,8 @@ const playlistSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    private: {
-      type: Boolean,
-      default: false,
+    public: {
+      type: String,
       required: true,
     },
   },

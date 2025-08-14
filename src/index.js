@@ -8,6 +8,7 @@ process.on("uncaughtException", (err) => {
 
 import { app } from "./app.js";
 import { connectToDB, initDBEventHandlers } from "./db/database.js";
+import { cleanTempFolder } from "./utils/cleanFailedUploads.js";
 
 const port = process.env.PORT || 8000;
 
@@ -22,6 +23,10 @@ connectToDB()
   .catch((error) => console.log("MongoDB Connection Failed!", error));
 
 initDBEventHandlers();
+
+cleanTempFolder();
+
+setInterval(cleanTempFolder, 15 * 60 * 1000);
 
 process.on("unhandledRejection", (err) => {
   console.log("Unhandled Rejection! Shutting down...");
