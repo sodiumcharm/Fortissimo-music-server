@@ -18,14 +18,14 @@ import bcrypt from "bcrypt";
 const accessTokenOptions = {
   httpOnly: true,
   secure: true,
-  sameSite: "none",
+  sameSite: "None",
   maxAge: 1000 * 60 * 60 * 24 * 15,
 };
 
 const refreshTokenOptions = {
   httpOnly: true,
   secure: true,
-  sameSite: "none",
+  sameSite: "None",
   maxAge: 1000 * 60 * 60 * 24 * 30,
 };
 
@@ -46,6 +46,11 @@ export const getUserDetails = asyncHandler(async function (req, res, next) {
     .populate({
       path: "watchHistory.audio",
       select: "audio title coverImage artist",
+    })
+    .populate("publishedPresets")
+    .populate({
+      path: "importedPresets",
+      populate: { path: "creator", select: "fullname" },
     })
     .select("-password -refreshToken -__v");
 
@@ -264,7 +269,17 @@ export const loginUser = asyncHandler(async function (req, res, next) {
     user._id,
     { $set: { refreshToken: hashedRefreshToken } },
     { new: true }
-  ).select("-password -refreshToken -__v");
+  )
+    .populate({
+      path: "watchHistory.audio",
+      select: "audio title coverImage artist",
+    })
+    .populate("publishedPresets")
+    .populate({
+      path: "importedPresets",
+      populate: { path: "creator", select: "fullname" },
+    })
+    .select("-password -refreshToken -__v");
 
   if (!updatedUser) {
     return next(new ApiError(500, "Failed to save refresh token! Try again."));
@@ -303,7 +318,7 @@ export const refreshAccess = asyncHandler(async function (req, res, next) {
     const user = await User.findById(decoded._id);
 
     if (!user) {
-      return next(new ApiError(404, "User does no longer exist!"));
+      return next(new ApiError(401, "User does no longer exist!"));
     }
 
     if (user.isPasswordChangedAfter(decoded.iat)) {

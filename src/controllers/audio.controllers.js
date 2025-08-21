@@ -8,7 +8,6 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
-import mongoose from "mongoose";
 
 // *************************************************************
 // GET ALL AUDIOS CONTROLLER
@@ -363,6 +362,12 @@ export const editAudio = asyncHandler(async function (req, res, next) {
     return next(new ApiError(404, "This audio does no longer exist!"));
   }
 
+  if (audio.uploader.toString() !== verifiedUser._id.toString()) {
+    return next(
+      new ApiError(400, "It is not allowed to edit audio uploaded by others!")
+    );
+  }
+
   const uploadedFiles = req.files;
 
   let lyricsPath, imagePath;
@@ -440,6 +445,27 @@ export const editAudio = asyncHandler(async function (req, res, next) {
   }
 
   try {
+    if (audio.public === "false") {
+      await Promise.all([
+        User.updateMany(
+          {},
+          {
+            $pull: {
+              likedSongs: audio._id,
+              watchHistory: { audio: audio._id },
+            },
+          }
+        ),
+        Playlist.updateMany(
+          { songs: audio._id },
+          {
+            $pull: { songs: audio._id },
+            $inc: { totalDuration: -audio.duration },
+          }
+        ),
+      ]);
+    }
+
     await audio.save({ validateBeforeSave: false });
   } catch (error) {
     return next(new ApiError(500, "Failed to update the audio!"));
@@ -564,7 +590,9 @@ export const recordHistory = asyncHandler(async function (req, res, next) {
   const verifiedUser = req.user;
 
   if (!verifiedUser) {
-    return res.status(204).end();
+    return next(
+      new ApiError(401, "Unauthorized request denied! Please login first.")
+    );
   }
 
   const { audioId, context, playlistId } = req.body;

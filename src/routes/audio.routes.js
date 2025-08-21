@@ -48,6 +48,6 @@ router.route("/edit").patch(
   editAudio
 );
 
-router.route("/record-history").post(softTokenCheck, recordHistory);
+router.route("/record-history").post(verifyAccessToken, recordHistory);
 
 export default router;

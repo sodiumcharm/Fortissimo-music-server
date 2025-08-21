@@ -6,6 +6,7 @@ import { randomOTPGenerator } from "../utils/otpGenerator.js";
 import { sendEmail } from "../utils/nodeMailer.js";
 import { mailHTML, mailText } from "../utils/emailTemplates.js";
 import bcrypt from "bcrypt";
+import { isValidEmail } from "../utils/validators.js";
 
 // *************************************************************
 // GENERATE EMAIL VERIFICATION OTP CONTROLLER
@@ -162,6 +163,10 @@ export const generatePasswordOtp = asyncHandler(
     if (email.trim() === "") {
       return next(new ApiError(400, "Email address is required!"));
     }
+
+    if (!isValidEmail(email)) {
+      return next(new ApiError(400, "Invalid email address provided!"));
+    } 
 
     const user = await User.findOne({ email: email });
 

@@ -51,7 +51,7 @@ const audioFilter = function (req, file, cb) {
 const uploadProfileImage = multer({
   storage,
   limits: {
-    fileSize: 2 * 1024 * 1024,
+    fileSize: 2.5 * 1024 * 1024,
   },
   fileFilter: imageFilter,
 });
@@ -67,7 +67,7 @@ const uploadCoverImage = multer({
 const uploadAudio = multer({
   storage,
   limits: {
-    fileSize: 15 * 1024 * 1024,
+    fileSize: 20 * 1024 * 1024,
     files: 3,
   },
   fileFilter: audioFilter,

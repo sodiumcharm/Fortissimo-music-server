@@ -96,6 +96,18 @@ const userSchema = new mongoose.Schema(
         ref: "Playlist",
       },
     ],
+    publishedPresets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Equalizer",
+      },
+    ],
+    importedPresets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Equalizer",
+      },
+    ],
     activeOtp: {
       type: String,
       trim: true,

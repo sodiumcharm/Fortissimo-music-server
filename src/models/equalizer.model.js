@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const equalizerSchema = new mongoose.Schema(
   {
-    settingsName: {
+    presetName: {
       type: String,
       trim: true,
       required: true,
