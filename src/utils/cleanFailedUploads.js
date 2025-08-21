@@ -12,6 +12,8 @@ export const cleanTempFolder = async function () {
     const now = Date.now();
 
     for (const file of files) {
+      if (file === ".gitkeep") continue;
+      
       const filePath = path.join(TEMP_DIR, file);
 
       const stats = await fs.stat(filePath);
