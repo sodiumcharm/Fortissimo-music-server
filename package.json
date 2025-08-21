@@ -5,8 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "prod": "cross-env NODE_ENV=production nodemon src/index.js"
+    "prod": "node src/index.js"
   },
   "keywords": [
     "javascript",
