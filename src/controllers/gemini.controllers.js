@@ -29,7 +29,7 @@ export const geminiAI = asyncHandler(async function (req, res, next) {
 
     const reply = result.response.text();
 
-    res.status(200).json(new ApiResponse(null, reply));
+    res.status(200).json(new ApiResponse({ reply }));
   } catch (error) {
     if (error.message.includes("Quota") || error.status === 429) {
       return next(
