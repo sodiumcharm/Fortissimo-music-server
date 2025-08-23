@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "prod": "node src/index.js"
+    "prod": "node src/index.js",
+    "dev": "cross-env NODE_ENV=development nodemon src/index.js",
+    "dev-prod": "cross-env NODE_ENV=production nodemon src/index.js"
   },
   "keywords": [
     "javascript",
@@ -19,6 +21,7 @@
     "prettier": "^3.6.2"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
