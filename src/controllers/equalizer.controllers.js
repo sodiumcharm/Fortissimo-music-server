@@ -81,7 +81,7 @@ export const createPreset = asyncHandler(async function (req, res, next) {
     { new: true }
   );
 
-  await preset.populate("creator", "fullname");
+  await preset.populate("creator", "fullname profileImage");
 
   if (!updatedUser) {
     return next(new ApiError(500, "Failed to update the user!"));
