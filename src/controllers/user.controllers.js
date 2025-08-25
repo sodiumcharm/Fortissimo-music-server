@@ -47,11 +47,6 @@ export const getUserDetails = asyncHandler(async function (req, res, next) {
       path: "watchHistory.audio",
       select: "audio title coverImage artist",
     })
-    .populate("publishedPresets")
-    .populate({
-      path: "importedPresets",
-      populate: { path: "creator", select: "fullname" },
-    })
     .select("-password -refreshToken -__v");
 
   if (!user) {
@@ -273,11 +268,6 @@ export const loginUser = asyncHandler(async function (req, res, next) {
     .populate({
       path: "watchHistory.audio",
       select: "audio title coverImage artist",
-    })
-    .populate("publishedPresets")
-    .populate({
-      path: "importedPresets",
-      populate: { path: "creator", select: "fullname" },
     })
     .select("-password -refreshToken -__v");
 
