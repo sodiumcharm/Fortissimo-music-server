@@ -110,7 +110,7 @@ export const importPreset = asyncHandler(async function (req, res, next) {
   const updatedUser = await User.findByIdAndUpdate(
     verifiedUser._id,
     {
-      $push: { importedPresets: preset._id },
+      $addToSet: { importedPresets: preset._id },
     },
     { new: true }
   );
