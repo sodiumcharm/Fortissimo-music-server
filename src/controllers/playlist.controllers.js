@@ -229,6 +229,8 @@ export const removeAudio = asyncHandler(async function (req, res, next) {
     { new: true }
   );
 
+  await User.updateMany({}, { $pull: { watchHistory: { audio: audioId, playedFromPlaylist: playlistId } } });
+
   if (!updatedPlaylist) {
     return next(
       new ApiError(500, "Failed to remove the audio from the playlist!")
