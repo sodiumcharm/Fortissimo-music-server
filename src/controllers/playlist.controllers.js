@@ -78,7 +78,7 @@ export const createPlaylist = asyncHandler(async function (req, res, next) {
     }
   }
 
-  playlistInfo.coverImage = uploadResult?.url || "";
+  playlistInfo.coverImage = uploadResult?.secure_url || "";
   playlistInfo.coverImageId = uploadResult?.public_id || "";
   playlistInfo.creator = verifiedUser._id;
 
@@ -514,7 +514,7 @@ export const editPlaylist = asyncHandler(async function (req, res, next) {
   }
 
   if (imageUploadResult) {
-    playlist.coverImage = imageUploadResult.url;
+    playlist.coverImage = imageUploadResult.secure_url;
     playlist.coverImageId = imageUploadResult.public_id;
   }
 

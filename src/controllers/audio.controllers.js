@@ -125,14 +125,14 @@ export const handleAudioUpload = asyncHandler(async function (req, res, next) {
 
   audioInfo.uploader = verifiedUser._id;
 
-  audioInfo.audio = audioUploadResult.url;
+  audioInfo.audio = audioUploadResult.secure_url;
   audioInfo.audioUploadId = audioUploadResult.public_id;
   audioInfo.duration = audioUploadResult.duration;
 
-  audioInfo.lyrics = lyricsUploadResult?.url || "";
+  audioInfo.lyrics = lyricsUploadResult?.secure_url || "";
   audioInfo.lyricsUploadId = lyricsUploadResult?.public_id || "";
 
-  audioInfo.coverImage = imageUploadResult?.url || "";
+  audioInfo.coverImage = imageUploadResult?.secure_url || "";
   audioInfo.coverImageId = imageUploadResult?.public_id || "";
 
   const audio = await Audio.create(audioInfo);
@@ -435,12 +435,12 @@ export const editAudio = asyncHandler(async function (req, res, next) {
   }
 
   if (lyricsUploadResult) {
-    audio.lyrics = lyricsUploadResult.url;
+    audio.lyrics = lyricsUploadResult.secure_url;
     audio.lyricsUploadId = lyricsUploadResult.public_id;
   }
 
   if (imageUploadResult) {
-    audio.coverImage = imageUploadResult.url;
+    audio.coverImage = imageUploadResult.secure_url;
     audio.coverImageId = imageUploadResult.public_id;
   }
 

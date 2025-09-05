@@ -64,7 +64,7 @@ export const getOtherUser = asyncHandler(async function (req, res, next) {
   const userId = req.params?.id;
 
   const user = await User.findById(userId).select(
-    "fullname username profileImage uploads createdPlaylists"
+    "fullname profileImage uploads createdPlaylists"
   );
 
   if (!user) {
@@ -167,7 +167,7 @@ export const registerUser = asyncHandler(async function (req, res, next) {
   }
 
   // Getting Cloudinary image url if uploaded successfully
-  const imageUrl = uploadResult?.url || "";
+  const imageUrl = uploadResult?.secure_url || "";
   const imageId = uploadResult?.public_id || "";
 
   userInfo.profileImage = imageUrl;
@@ -604,7 +604,7 @@ export const changeProfilePhoto = asyncHandler(async function (req, res, next) {
     );
   }
 
-  user.profileImage = uploadResult.url;
+  user.profileImage = uploadResult.secure_url;
   user.profileImageId = uploadResult.public_id;
 
   try {
