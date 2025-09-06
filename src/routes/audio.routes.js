@@ -14,6 +14,7 @@ import {
   recordHistory,
   removeCoverImage,
   removeLyrics,
+  reportAudio,
 } from "../controllers/audio.controllers.js";
 
 const router = Router();
@@ -49,5 +50,7 @@ router.route("/edit").patch(
 );
 
 router.route("/record-history").post(verifyAccessToken, recordHistory);
+
+router.route("/report/:id").patch(verifyAccessToken, reportAudio);
 
 export default router;

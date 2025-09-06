@@ -648,3 +648,68 @@ export const recordHistory = asyncHandler(async function (req, res, next) {
 
   res.status(200).json(new ApiResponse({ history: newHistory }));
 });
+
+export const reportAudio = asyncHandler(async function (req, res, next) {
+  const verifiedUser = req.user;
+
+  if (!verifiedUser) {
+    return next(
+      new ApiError(401, "Unauthorized request denied! Please login first.")
+    );
+  }
+
+  const audioId = req.params?.id;
+
+  const audio = await Audio.findById(audioId);
+
+  if (!audio) {
+    return next(new ApiError(404, "The following audio does not exist!"));
+  }
+
+  if (audio.reports.includes(verifiedUser._id)) {
+    return next(new ApiError(400, "You have already reported it!"));
+  }
+
+  const updatedAudio = await Audio.findByIdAndUpdate(
+    audioId,
+    {
+      $addToSet: { reports: verifiedUser._id },
+    },
+    { new: true }
+  );
+
+  if (!updatedAudio) {
+    return next(new ApiError(500, "Failed to register the report!"));
+  }
+
+  try {
+    if (updatedAudio.reports.length >= 100) {
+      await Audio.findByIdAndDelete(audioId);
+
+      await Promise.all([
+        User.updateOne(
+          { _id: verifiedUser._id },
+          { $pull: { uploads: audioId } }
+        ),
+        User.updateMany(
+          { likedSongs: audioId },
+          { $pull: { likedSongs: audioId } }
+        ),
+        User.updateMany({}, { $pull: { watchHistory: { audio: audioId } } }),
+        Playlist.updateMany(
+          { songs: audioId },
+          {
+            $pull: { songs: audioId },
+            $inc: { totalDuration: -audio.duration },
+          }
+        ),
+      ]);
+    }
+  } catch (error) {
+    return next(new ApiError(500, "Error during registration of report!"));
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(null, "Report was successfully registered."));
+});
