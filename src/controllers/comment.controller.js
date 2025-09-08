@@ -7,7 +7,10 @@ import { Comment } from "../models/comment.model.js";
 export const getComments = asyncHandler(async function (req, res, next) {
   const audioId = req.params?.id;
 
-  const audio = await Audio.findById(audioId).populate("comments");
+  const audio = await Audio.findById(audioId).populate({
+    path: "comments",
+    populate: { path: "user", select: "fullname profileImage" },
+  });
 
   if (!audio) {
     return next(new ApiError(404, "The audio does no longer exist!"));
@@ -45,7 +48,12 @@ export const postComment = asyncHandler(async function (req, res, next) {
     $addToSet: { comments: comment._id },
   });
 
-  res.status(200).json(new ApiResponse({ comment }));
+  const createdComment = await Comment.findById(comment._id).populate(
+    "user",
+    "fullname profileImage"
+  );
+
+  res.status(200).json(new ApiResponse({ comment: createdComment }));
 });
 
 export const likeComment = asyncHandler(async function (req, res, next) {
