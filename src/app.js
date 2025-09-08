@@ -28,6 +28,7 @@ import audioRouter from "./routes/audio.routes.js";
 import playlistRouter from "./routes/playlist.routes.js";
 import equalizerRouter from "./routes/equalizer.routes.js";
 import geminiRouter from "./routes/geminichat.routes.js";
+import commentRouter from "./routes/comment.routes.js";
 
 app.use(`${MAIN_ROUTE}/users`, userRouter);
 
@@ -38,6 +39,8 @@ app.use(`${MAIN_ROUTE}/playlists`, playlistRouter);
 app.use(`${MAIN_ROUTE}/eq`, equalizerRouter);
 
 app.use(`${MAIN_ROUTE}/chatbot`, geminiRouter);
+
+app.use(`${MAIN_ROUTE}/comments`, commentRouter);
 
 // ERROR HANDLING
 app.use(globalErrorHandler);
