@@ -8,6 +8,8 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/cloudinary.js";
+import { songReportMailHTML, songReportTextMail } from "../utils/emailTemplates.js";
+import { sendEmail } from "../utils/nodeMailer.js";
 
 // *************************************************************
 // GET ALL AUDIOS CONTROLLER
@@ -658,7 +660,7 @@ export const reportAudio = asyncHandler(async function (req, res, next) {
     );
   }
 
-  const audioId = req.params?.id;
+  const { audioId, reason } = req.body;
 
   const audio = await Audio.findById(audioId);
 
@@ -668,6 +670,12 @@ export const reportAudio = asyncHandler(async function (req, res, next) {
 
   if (audio.reports.includes(verifiedUser._id)) {
     return next(new ApiError(400, "You have already reported it!"));
+  }
+
+  const uploader = await User.findById(audio.uploader);
+
+  if (!uploader) {
+    return next(new ApiError(500, "Failed to register the report!"));
   }
 
   const updatedAudio = await Audio.findByIdAndUpdate(
@@ -688,7 +696,7 @@ export const reportAudio = asyncHandler(async function (req, res, next) {
 
       await Promise.all([
         User.updateOne(
-          { _id: verifiedUser._id },
+          { _id: uploader._id },
           { $pull: { uploads: audioId } }
         ),
         User.updateMany(
@@ -708,6 +716,12 @@ export const reportAudio = asyncHandler(async function (req, res, next) {
   } catch (error) {
     return next(new ApiError(500, "Error during registration of report!"));
   }
+
+  const text = songReportTextMail(uploader.fullname, audio.title, reason, updatedAudio.reports.length);
+
+  const html = songReportMailHTML(uploader.fullname, audio.title, reason, updatedAudio.reports.length);
+
+  await sendEmail(uploader.email, "Song Report Notification - Fortissimo", text, html);
 
   res
     .status(200)

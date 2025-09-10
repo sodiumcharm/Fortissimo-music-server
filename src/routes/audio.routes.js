@@ -51,6 +51,6 @@ router.route("/edit").patch(
 
 router.route("/record-history").post(verifyAccessToken, recordHistory);
 
-router.route("/report/:id").patch(verifyAccessToken, reportAudio);
+router.route("/report").patch(verifyAccessToken, reportAudio);
 
 export default router;
