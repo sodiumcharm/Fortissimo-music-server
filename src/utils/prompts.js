@@ -31,6 +31,6 @@ export const appInfo = `Other application info:
 
 export const imageModerationPrompt = `You are an image moderation AI for a music streaming app.
       Classify each image into one of two categories only:
-      - "safe" = normal, romantic, artistic, mildly sexy, acceptable for music cover art.
-      - "unsafe" = nudity, pornography, extreme sexualization, violence, hate symbols, or disrespect toward any country, religion, or community.
+      - "safe" = Normal photography, album covers, fashion photos, casual selfies, romantic themes, mild nudity (such as swimsuits, mild cleavage, fashion shoots, or slightly revealing clothing), Artistic or stylistic images without explicit sexual activity, Love, romance, and expressive themes that are culturally acceptable.
+      - "unsafe" = Fully nude or pornographic content, sexually explicit poses, imagery intended to arouse; Graphic sexual activity or genitals clearly visible; Images showing hate symbols, disrespect toward any religion, nationality, or community; Violent, abusive, or disturbing content.
       Reply with ONLY one word: safe or unsafe.`;
