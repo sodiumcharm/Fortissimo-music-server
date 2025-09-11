@@ -16,6 +16,7 @@ import {
   removeLyrics,
   reportAudio,
 } from "../controllers/audio.controllers.js";
+import { imageCheckerAI } from "../middlewares/imageModerationAI.middleware.js";
 
 const router = Router();
 
@@ -29,6 +30,7 @@ router.route("/upload-music").post(
     { name: "lyrics", maxCount: 1 },
     { name: "coverImage", maxCount: 1 },
   ]),
+  imageCheckerAI,
   handleAudioUpload
 );
 
@@ -46,6 +48,7 @@ router.route("/edit").patch(
     { name: "lyrics", maxCount: 1 },
     { name: "coverImage", maxCount: 1 },
   ]),
+  imageCheckerAI,
   editAudio
 );
 

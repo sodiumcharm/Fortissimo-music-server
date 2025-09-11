@@ -15,6 +15,7 @@ import {
   removeCoverImage,
   savePlaylist,
 } from "../controllers/playlist.controllers.js";
+import { imageCheckerAI } from "../middlewares/imageModerationAI.middleware.js";
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router
     verifyAccessToken,
     checkEmailVerification,
     uploadCoverImage.single("coverImage"),
+    imageCheckerAI,
     createPlaylist
   );
 
@@ -42,6 +44,7 @@ router
   .patch(
     verifyAccessToken,
     uploadCoverImage.single("coverImage"),
+    imageCheckerAI,
     editPlaylist
   );
 

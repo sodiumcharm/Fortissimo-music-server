@@ -22,8 +22,15 @@ export const appFeatures = `Fortissimo App Features:
 16. User can edit their uploaded songs at uploaded songs menu under User settings.
 17. User can see lyrics of a song (if available) by clicking a small musical notation icon on playbar, on the left side of volumebar.
 18. The history only keeps last 50 records.
-19. User can change their display name, password and profile image. But they cannot change the username.`;
+19. User can change their display name, password and profile image. But they cannot change the username.
+20. Fortissimo has an Image upload moderation AI which checks if the image contains any nudity, pornography, extreme sexualization, violence, hate symbols, or disrespect toward any country, religion, or community. So tell user to be mindful of their uploads.`;
 
 export const appInfo = `Other application info: 
 1. Most user related featues like song uploads, creating playlists, password change etc requires email verification for security reasons.
 2. Maximum allowed user profile photo image size should be within 2MB. Maximul allowed cover image size for any song or playlist is 5MB and maximum allowed size for an audio file should be under 15MB.`;
+
+export const imageModerationPrompt = `You are an image moderation AI for a music streaming app.
+      Classify each image into one of two categories only:
+      - "safe" = normal, romantic, artistic, mildly sexy, acceptable for music cover art.
+      - "unsafe" = nudity, pornography, extreme sexualization, violence, hate symbols, or disrespect toward any country, religion, or community.
+      Reply with ONLY one word: safe or unsafe.`;

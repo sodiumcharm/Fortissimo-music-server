@@ -21,6 +21,7 @@ import {
 } from "../controllers/otpVerification.controllers.js";
 import { verifyAccessToken } from "../middlewares/verifyToken.middleware.js";
 import { checkEmailVerification } from "../middlewares/checkEmailVerified.middleware.js";
+import { imageCheckerAI } from "../middlewares/imageModerationAI.middleware.js";
 
 const router = Router();
 
@@ -30,7 +31,7 @@ router.route("/:id").get(getOtherUser);
 
 router
   .route("/signup")
-  .post(uploadProfileImage.single("profileImage"), registerUser);
+  .post(uploadProfileImage.single("profileImage"), imageCheckerAI, registerUser);
 
 router.route("/login").post(loginUser);
 
@@ -60,6 +61,7 @@ router
     verifyAccessToken,
     checkEmailVerification,
     uploadProfileImage.single("profileImage"),
+    imageCheckerAI,
     changeProfilePhoto
   );
 
