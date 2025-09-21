@@ -1,4 +1,7 @@
 import "dotenv/config";
+import { app } from "./app.js";
+import { connectToDB, initDBEventHandlers } from "./db/database.js";
+import { cleanTempFolder } from "./utils/cleanFailedUploads.js";
 
 process.on("uncaughtException", (err) => {
   console.log("Uncaught Exception! Shutting down...");
@@ -6,13 +9,19 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-import { app } from "./app.js";
-import { connectToDB, initDBEventHandlers } from "./db/database.js";
-import { cleanTempFolder } from "./utils/cleanFailedUploads.js";
+process.on("unhandledRejection", (err) => {
+  console.log("Unhandled Rejection! Shutting down...");
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});
 
 const port = process.env.PORT || 8000;
 
 let server;
+
+initDBEventHandlers();
 
 connectToDB()
   .then(() => {
@@ -22,16 +31,8 @@ connectToDB()
   })
   .catch((error) => console.log("MongoDB Connection Failed!", error));
 
-initDBEventHandlers();
+await cleanTempFolder();
 
-cleanTempFolder();
-
-setInterval(cleanTempFolder, 15 * 60 * 1000);
-
-process.on("unhandledRejection", (err) => {
-  console.log("Unhandled Rejection! Shutting down...");
-  console.log(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
-  });
-});
+setInterval(async () => {
+  await cleanTempFolder();
+}, 15 * 60 * 1000);
